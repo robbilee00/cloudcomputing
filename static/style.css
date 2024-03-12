@@ -1,0 +1,164 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
+  margin: 0;
+  padding: 0;
+}
+
+.login-container {
+  background-color: #fff;
+  max-width: 360px;
+  margin: 100px auto;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-container h2 {
+  text-align: center;
+  color: #333;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.input-group input[type="text"],
+.input-group input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 3px;
+  background-color: #007bff;
+  color: #fff;
+  cursor: pointer;
+}
+
+button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+.register-link {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.register-link a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+
+.registration-container {
+  background-color: #fff;
+  max-width: 360px;
+  margin: 100px auto;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.registration-container h2 {
+  text-align: center;
+  color: #333;
+}
+
+.user-area {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.user-area img {
+  border-radius: 50%;
+}
+
+.user-area a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.user-area a:hover {
+  text-decoration: underline;
+}
+
+.message-posting-area {
+  margin-bottom: 20px;
+}
+
+.message-posting-area h2 {
+  margin-bottom: 10px;
+}
+
+.message-display-area {
+  border-top: 1px solid #ccc;
+  padding-top: 20px;
+}
+
+.message {
+  margin-bottom: 20px;
+}
+
+.message-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.message-info img {
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.message-info .user-name {
+  margin-right: auto;
+  font-weight: bold;
+}
+
+.message-info .post-date {
+  color: #888;
+}
+
+.message-content h3 {
+  margin-bottom: 5px;
+}
+
+.message-content p {
+  margin-bottom: 10px;
+}
+
+.message-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+.logout-link {
+  text-align: center;
+}
+
+.logout-link a {
+  color: #dc3545;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.logout-link a:hover {
+  text-decoration: underline;
+}

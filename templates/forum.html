@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- User Area -->
+        <div class="user-area">
+            <!-- User Profile Image -->
+            <img src="{{ profile_picture_url }}" alt="User Profile Image" width="120" height="120">
+            <!-- User Name -->
+            <span class="user-name">{{ username }}</span>
+            <!-- Logout Link -->
+            <div class="logout-link">
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </div>
+        
+        <!-- Message Posting Area -->
+        <div class="message-posting-area">
+            <h2>Post a Message</h2>
+            <form action="#" method="POST" enctype="multipart/form-data">
+                <div class="input-group">
+                    <label for="subject">Subject:</label>
+                    <input type="text" id="subject" name="subject" required>
+                </div>
+                <div class="input-group">
+                    <label for="message-text">Message Text:</label>
+                    <textarea id="message-text" name="message-text" rows="4" required></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="image">Image:</label>
+                    <input type="file" id="image" name="image" accept="image/*">
+                </div>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        
+        <!-- Message Display Area -->
+        <div class="message-display-area">
+            <h2>Recent Messages</h2>
+            <!-- Display 10 recently posted messages -->
+            <!-- Repeat the below message block for each message -->
+            {% for message in messages %}
+            <div class="message">
+                <div class="message-info">
+                    <!-- User Profile Image -->
+                    <img src="{{ message.user_profile_picture_url }}" alt="User Profile Image" width="50" height="50">
+                    <!-- User Name -->
+                    <span class="user-name">{{ message.username }}</span>
+                    <!-- Posted Date & Time -->
+                    <span class="post-date">{{ message.posted_date }}</span>
+                </div>
+                <div class="message-content">
+                    <!-- Message Subject -->
+                    <h3>{{ message.subject }}</h3>
+                    <!-- Message Text -->
+                    <p>{{ message.text }}</p>
+                    <!-- Message Image -->
+                    <img src="{{ message.image_url }}" alt="Message Image">
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
