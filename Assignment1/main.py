@@ -19,12 +19,13 @@ bucket = storage_client.bucket(bucket_name)
 user_query = datastore_client.query(kind='User')
 users = list(user_query.fetch())
 
-messages_query = datastore_client.query(kind='Message')
-messages_query.order = ['-posted_date']  # Order messages by descending posted_date
-messages = list(messages_query.fetch(limit=10))
+
 
 @app.route("/")
 def root():
+    messages_query = datastore_client.query(kind='Message')
+    messages_query.order = ['-posted_date']  # Order messages by descending posted_date
+    messages = list(messages_query.fetch(limit=10))
     # If user is logged in ID will be saved in session, otherwise redirect to login page
     if 'id' in session:
         user_id = session['id']
