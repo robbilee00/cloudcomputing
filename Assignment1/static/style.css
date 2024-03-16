@@ -181,3 +181,7 @@ button[type="submit"]:hover {
 .logout-link a:hover {
   text-decoration: underline;
 }
+
+.response {
+  color: red;
+}

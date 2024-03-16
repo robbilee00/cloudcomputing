@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, render_template, request, redirect, session, url_for, flash
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 from google.cloud import datastore
 from google.cloud import storage
 from datetime import datetime
@@ -26,18 +27,17 @@ messages = list(messages_query.fetch(limit=10))
 def root():
     # If user is logged in ID will be saved in session, otherwise redirect to login page
     if 'id' in session:
-        for user_entity in users:
-            if user_entity.get('id') == session['id']:
-                print(user_entity.get('id'))
-                username = user_entity.get('username')
-                profile_picture_url = user_entity.get('profile_picture_url')
+        user_id = session['id']
+        user = get_user(user_id)
+        username, profile_picture_url = get_user_info(user_id)
+
         # Fetch username and profile picture for each message's user_id
         for message in messages:
             user_id = message.get('user_id')
-            username, profile_picture_url = get_user_info(user_id)
-            if username is not None and profile_picture_url is not None:
+            message_username, message_profile_picture_url = get_user_info(user_id)
+            if message_username is not None and profile_picture_url is not None:
                 message['username'] = username
-                message['user_profile_picture_url'] = profile_picture_url
+                message['user_profile_picture_url'] = message_profile_picture_url
                 # Convert posted_date to datetime object if it's a string
                 if isinstance(message['posted_date'], str):
                     message['posted_date'] = datetime.strptime(message['posted_date'], "%Y-%m-%d %H:%M:%S")
@@ -61,7 +61,7 @@ def login():
         print("User entity Username: ", users)
         if users:
             for user in users:
-                if user['id'] == id and user['password'] == password:
+                if user['id'] == id and check_password_hash(user['password'], password):
                     session['id'] = id
                     print('login')
                     print(session['id'])
@@ -79,7 +79,7 @@ def register():
         id = request.form['id']
         username = request.form['username']
         password = request.form['password']
-        profile_picture = request.files['profile_picture']
+        hashed_password = generate_password_hash(password)  # Hash the password
 
         # Check if the user already exists in the datastore
         query = datastore_client.query(kind='User')
@@ -101,22 +101,22 @@ def register():
         user.update({
             'id': id,
             'username': username,
-            'password': password
+            'password': hashed_password  # Store hashed password
         })
+        # Handle image upload
+        if 'image' in request.files:
+            image_file = request.files['image']
+            if image_file:
+                # Secure the filename to prevent directory traversal
+                filename = secure_filename(image_file.filename)
+                # Upload the image to Google Cloud Storage
+                blob = bucket.blob(filename)
+                blob.upload_from_file(image_file)
+                # Update the message entity with the new image URL
+                user['profile_picture_url'] = blob.public_url
 
         # Save the user entity to Cloud Datastore
         datastore_client.put(user)
-
-        # Store the profile picture in Google Cloud Storage
-        if profile_picture:
-            # Generate a unique filename for the profile picture
-            filename = secure_filename(profile_picture.filename)
-            blob = bucket.blob(filename)
-            blob.upload_from_file(profile_picture)
-            user['profile_picture_url'] = blob.public_url
-
-            # Update the user entity in Cloud Datastore with the profile picture URL
-            datastore_client.put(user)
 
         # Redirect to a success page or login page
         return redirect(url_for('login'))
@@ -170,23 +170,137 @@ def message():
         return redirect(url_for('root'))
     
     # Render the forum page with the updated messages
-    return render_template('forum.html', messages=messages)
+    return redirect(url_for('forum'))
 
+@app.route('/admin')
+def admin():
+    if 'id' in session:
+        user_id = session['id']
+        user = get_user(user_id)
+        messages = get_user_messages(user_id)
+        username, profile_picture_url = get_user_info(user_id)
+        messageresponse = request.args.get('messageresponse')
+        
+        # Update messages with user profile picture URL
+        for message in messages:
+            message['user_profile_picture_url'] = profile_picture_url
+
+        return render_template('admin.html', user=user, messages=messages, username= username, profile_picture_url=profile_picture_url, messageresponse=messageresponse)
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/change_password', methods=['POST'])
+def change_password():
+    if 'id' in session:
+        user_id = session['id']
+        user = get_user(user_id)
+        messages = get_user_messages(user_id)
+        username, profile_picture_url = get_user_info(user_id)
+        # Update messages with user profile picture URL
+        for message in messages:
+            message['user_profile_picture_url'] = profile_picture_url
+
+        old_password = request.form['old_password']
+        new_password = request.form['new_password']
+        
+        # Check if old password matches
+        if check_password_hash(user['password'], old_password):
+            # Update password
+            user_key = datastore_client.key('User', user.key.id)
+            user['password'] = generate_password_hash(new_password)
+            datastore_client.put(user)
+            passwordresponse = 'Password updated successfully!'
+        else:
+            passwordresponse = 'The old password is incorrect.'
+        return render_template('admin.html', user=user, messages=messages, username=username, profile_picture_url=profile_picture_url, passwordresponse=passwordresponse)
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/edit_message/<message_id>', methods=['GET', 'POST'])
+def edit_message(message_id):
+    if 'id' in session:
+        user_id = session['id']
+        user = get_user(user_id)
+        messages = get_user_messages(user_id)
+        username, profile_picture_url = get_user_info(user_id)
+        # Update messages with user profile picture URL
+        for message in messages:
+            message['user_profile_picture_url'] = profile_picture_url
+        message = get_message(int(message_id))
+        messageresponse = ""
+        
+
+        print('user: ', user)
+        print('message_id: ', message_id)
+        print('message: ', message)
+        print('user_id: ', user_id)
+        print('message user_id: ', message['user_id'])
+
+        if message and message['user_id'] == user_id:
+            
+            if request.method == 'POST':
+                new_subject = request.form['subject']
+                new_text = request.form['message-text']
+                # Update message in datastore
+                message['subject'] = new_subject
+                message['text'] = new_text
+                message['posted_date'] = datetime.now()
+
+                # Handle image upload
+                if 'image' in request.files:
+                    image_file = request.files['image']
+                    if image_file:
+                        # Secure the filename to prevent directory traversal
+                        filename = secure_filename(image_file.filename)
+                        # Upload the image to Google Cloud Storage
+                        blob = bucket.blob(filename)
+                        blob.upload_from_file(image_file)
+                        # Update the message entity with the new image URL
+                        message['image_url'] = blob.public_url
+
+                datastore_client.put(message)
+                messageresponse = ('Message updated successfully!')
+                return redirect(url_for('admin', messageresponse=messageresponse))
+            else:
+                return redirect(url_for('admin'))
+        else:
+            messageresponse = ('You are not authorized to edit this message.')
+            return redirect(url_for('admin', messageresponse=messageresponse))
+    else:
+        return redirect(url_for('login'))
+
+def get_user(user_id):
+    query = datastore_client.query(kind='User')
+    query.add_filter('id', '=', user_id)
+    users = list(query.fetch())
+    if users:
+        return users[0]
+    else:
+        return None
+
+def get_user_messages(user_id):
+    query = datastore_client.query(kind='Message')
+    query.add_filter('user_id', '=', user_id)
+    return list(query.fetch())
+
+def get_all_messages():
+    query = datastore_client.query(kind='Message')
+    return list(query.fetch())
+
+def get_message(message_id):
+    message_key = datastore_client.key('Message', message_id)
+    return datastore_client.get(message_key)
 
 def get_user_info(user_id):
     
     # Query the datastore for the user with the given user_id
     user_query = datastore_client.query(kind='User')
     user_query.add_filter('id', '=', user_id)
-    print(user_id)
     user_entities = list(user_query.fetch(limit=1))
-    print(user_entities)
     if user_entities:
         user = user_entities[0]
         username = user.get('username')
-        print(username)
         profile_picture_url = user.get('profile_picture_url')
-        print(profile_picture_url)
         return username, profile_picture_url
     else:
         return None, None
@@ -198,4 +312,3 @@ def logout():
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=8080, debug=True)
-

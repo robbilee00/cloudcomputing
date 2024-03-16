@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>User Admin Page</title>
+</head>
+<body>
+    <h1>User Admin Page</h1>
+    <!-- User Area -->
+    <div class="user-area">
+        <!-- User Profile Image -->
+        <img src="{{ profile_picture_url }}" alt="User Profile Image" width="120" height="120">
+        <!-- User Name -->
+        <span class="user-name">{{ username }}</a></span>
+        <!-- Logout Link -->
+        <div class="logout-link">
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </div>
+
+    <!-- Change Password Form -->
+    <h2>Change Password</h2>
+    {% if passwordresponse %}
+        <div class="response">{{ passwordresponse }}</div>
+    {% endif %}
+    <form action="/change_password" method="post">
+        <label for="old_password">Old Password:</label>
+        <input type="password" id="old_password" name="old_password" required><br>
+        <label for="new_password">New Password:</label>
+        <input type="password" id="new_password" name="new_password" required><br>
+        <button type="submit">Change</button>
+    </form>
+
+    <!-- User Posts -->
+    <h2>User Posts</h2>
+    {% if messageresponse %}
+        <div class="response">{{ messageresponse }}</div>
+    {% endif %}
+    {% for message in messages %}
+        <div class="message">
+            <div class="message-info">
+                <!-- User Profile Image -->
+                <img src="{{ message.user_profile_picture_url }}" alt="User Profile Image" width="50" height="50">
+                <!-- User Name -->
+                <span class="user-name">{{ message.username }}</span>
+                <!-- Posted Date & Time -->
+                <span class="post-date">{{ message.posted_date }}</span>
+            </div>
+            <form action="/edit_message/{{ message.id }}" method="post">
+                <label for="subject">Subject:</label>
+                <input type="text" id="subject" name="subject" value="{{ message.subject }}"><br>
+                <label for="message-text">Message Text:</label>
+                <textarea id="message-text" name="message-text" rows="4" cols="150">{{ message.text }}</textarea><br>
+                <label for="image">Upload Image:</label>
+                <input type="file" id="image" name="image"><br>
+                 <img src="{{ message.image_url }}" alt="Message Image">
+                <button type="submit">Update</button>
+            </form>
+        </div>
+    {% endfor %}
+
+    <!-- Button to Navigate Back to Forum/Home Page -->
+    <form action="/" method="get">
+        <button type="submit">Back to Forum</button>
+    </form>
+</body>
+</html>

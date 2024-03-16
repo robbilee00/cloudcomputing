@@ -13,12 +13,13 @@
             <!-- User Profile Image -->
             <img src="{{ profile_picture_url }}" alt="User Profile Image" width="120" height="120">
             <!-- User Name -->
-            <span class="user-name">{{ username }}</span>
+            <span class="user-name"><a href="{{ url_for('admin') }}">{{ username }}</a></span>
             <!-- Logout Link -->
             <div class="logout-link">
                 <a href="{{ url_for('logout') }}">Logout</a>
             </div>
         </div>
+    </div>
         
         <!-- Message Posting Area -->
         <div class="message-posting-area">
