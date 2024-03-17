@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data from BigQuery</title>
+</head>
+<body>
+    <h1>Data from BigQuery</h1>
+
+    <!-- Display top 10 time slots with the highest trade value -->
+    <h2>Top 10 Time Slots with Highest Trade Value</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Time Reference</th>
+                <th>Trade Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in top_time_slots %}
+            <tr>
+                <td>{{ row['time_ref'] }}</td>
+                <td>{{ row['trade_value'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Display top 40 countries with the highest total trade deficit value -->
+    <h2>Top 40 Countries with Highest Trade Deficit</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Country Label</th>
+                <th>Product Type</th>
+                <th>Trade Deficit Value</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in top_countries_trade_deficit %}
+            <tr>
+                <td>{{ row['country_label'] }}</td>
+                <td>{{ row['product_type'] }}</td>
+                <td>{{ row['trade_deficit_value'] }}</td>
+                <td>{{ row['status'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Display top 25 services with the highest total trade surplus value -->
+    <h2>Top 25 Services with Highest Trade Surplus</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Service Label</th>
+                <th>Trade Surplus Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in top_services_highest_surplus %}
+                <tr>
+                    <td>{{ row['service_label'] }}</td>
+                    <td>{{ row['trade_surplus_value'] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

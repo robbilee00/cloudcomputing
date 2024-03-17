@@ -224,18 +224,12 @@ def edit_message(message_id):
         user = get_user(user_id)
         messages = get_user_messages(user_id)
         username, profile_picture_url = get_user_info(user_id)
+        image = request.files['image'] if 'image' in request.files else None
         # Update messages with user profile picture URL
         for message in messages:
             message['user_profile_picture_url'] = profile_picture_url
         message = get_message(int(message_id))
         messageresponse = ""
-        
-
-        print('user: ', user)
-        print('message_id: ', message_id)
-        print('message: ', message)
-        print('user_id: ', user_id)
-        print('message user_id: ', message['user_id'])
 
         if message and message['user_id'] == user_id:
             
@@ -248,16 +242,14 @@ def edit_message(message_id):
                 message['posted_date'] = datetime.now()
 
                 # Handle image upload
-                if 'image' in request.files:
-                    image_file = request.files['image']
-                    if image_file:
-                        # Secure the filename to prevent directory traversal
-                        filename = secure_filename(image_file.filename)
-                        # Upload the image to Google Cloud Storage
-                        blob = bucket.blob(filename)
-                        blob.upload_from_file(image_file)
-                        # Update the message entity with the new image URL
-                        message['image_url'] = blob.public_url
+                if image:
+                    # Secure the filename to prevent directory traversal
+                    filename = secure_filename(image.filename)
+                    # Upload the image to Google Cloud Storage
+                    blob = bucket.blob(filename)
+                    blob.upload_from_file(image)
+                    # Update the message entity with the new image URL
+                    message['image_url'] = blob.public_url
 
                 datastore_client.put(message)
                 messageresponse = ('Message updated successfully!')

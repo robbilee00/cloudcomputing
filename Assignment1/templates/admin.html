@@ -25,7 +25,7 @@
     {% if passwordresponse %}
         <div class="response">{{ passwordresponse }}</div>
     {% endif %}
-    <form action="/change_password" method="post">
+    <form action="/change_password" method="post" >
         <label for="old_password">Old Password:</label>
         <input type="password" id="old_password" name="old_password" required><br>
         <label for="new_password">New Password:</label>
@@ -48,13 +48,13 @@
                 <!-- Posted Date & Time -->
                 <span class="post-date">{{ message.posted_date }}</span>
             </div>
-            <form action="/edit_message/{{ message.id }}" method="post">
+            <form action="/edit_message/{{ message.id }}" method="post" enctype="multipart/form-data">
                 <label for="subject">Subject:</label>
                 <input type="text" id="subject" name="subject" value="{{ message.subject }}"><br>
                 <label for="message-text">Message Text:</label>
                 <textarea id="message-text" name="message-text" rows="4" cols="150">{{ message.text }}</textarea><br>
                 <label for="image">Upload Image:</label>
-                <input type="file" id="image" name="image"><br>
+                <input type="file" id="image" name="image" accept="image/*"><br>
                  <img src="{{ message.image_url }}" alt="Message Image">
                 <button type="submit">Update</button>
             </form>
